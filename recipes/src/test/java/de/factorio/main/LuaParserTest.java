@@ -1,20 +1,21 @@
 package de.factorio.main;
 
+import static de.factorio.main.RecipeExtractor.extractRecipesWithEnergy;
 import static guru.nidi.graphviz.model.Factory.graph;
 import static guru.nidi.graphviz.model.Factory.node;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.engine.GraphvizJdkEngine;
 import guru.nidi.graphviz.model.Graph;
@@ -24,21 +25,51 @@ public class LuaParserTest {
 	Pattern ingredientPattern = Pattern.compile("\\{\"((\\w|-)+)\",\\s*(\\d+)\\s*\\}");
 	Pattern ingredientFluidPattern = Pattern.compile("name=\"((\\w|-)+)\",\\s*amount=(\\d+)");
 	Pattern resultPattern = Pattern.compile("result = \"((\\w|-)+)\"");
+	Pattern energyPattern = Pattern.compile("energy_required = \"((\\w|-)+)\"");
 
 	@Test
-	public void testName() throws Exception {
+	@Ignore
+	public void extractRecipes_AndWriteJsonWithTemplate() throws Exception {
 		String file = "C:\\Spiele\\Factorio\\data\\base\\prototypes\\recipe\\recipe.lua";
-		ArrayList<Recipe> recipes = extractRecipes(file);
-		Input input = new Input(recipes);
 		SourceFileWritingService sourceFileWritingService = new SourceFileWritingService();
-		sourceFileWritingService.createFilesSafely(input);
-		assertThat(recipes).isEqualTo("");
+		sourceFileWritingService.createFilesSafely(new Input(extractRecipesWithEnergy(file)));
 	}
 
 	@Test
-	public void testName2() throws Exception {
+	public void extractRecipes_AndWriteJsonWithJackson() throws Exception {
 		String file = "C:\\Spiele\\Factorio\\data\\base\\prototypes\\recipe\\recipe.lua";
-		ArrayList<Recipe> recipes = extractRecipes(file);
+		ObjectMapper objectMapper = new ObjectMapper();
+		GraphInput graphInput = new GraphInput(new Input(extractRecipesWithEnergy(file)));
+		objectMapper.writeValue(new File("example//d3test//recipes.json"), graphInput);
+	}
+
+	@Test
+	public void extractRecipes_WithEnergy() throws Exception {
+		String file = "C:\\Spiele\\Factorio\\data\\base\\prototypes\\recipe\\recipe.lua";
+		Input input = new Input(RecipeExtractor.extractRecipesWithoutEnergy(file));
+		assertThat(input).isEqualTo("");
+	}
+
+	@Test
+	public void extractRecipes_WithoutEnergy() throws Exception {
+		String file = "C:\\Spiele\\Factorio\\data\\base\\prototypes\\recipe\\recipe.lua";
+		Input input = new Input(RecipeExtractor.extractRecipesWithEnergy(file));
+		assertThat(input).isEqualTo("");
+	}
+
+	@Test
+	public void extractAllRecipes() throws Exception {
+		String file = "C:\\Spiele\\Factorio\\data\\base\\prototypes\\recipe\\recipe.lua";
+		Input withEnergy = new Input(RecipeExtractor.extractRecipesWithEnergy(file));
+		Input withoutEnergy = new Input(RecipeExtractor.extractRecipesWithoutEnergy(file));
+		assertThat(withEnergy).isEqualTo("");
+	}
+
+	@Test
+	@Ignore
+	public void extractRecipes_AndDrawGraph() throws Exception {
+		String file = "C:\\Spiele\\Factorio\\data\\base\\prototypes\\recipe\\recipe.lua";
+		ArrayList<Recipe> recipes = extractRecipesWithEnergy(file);
 
 		GraphvizJdkEngine engine = new GraphvizJdkEngine();
 		Graphviz.useEngine(engine, engine);
@@ -53,41 +84,7 @@ public class LuaParserTest {
 			}
 			g = g.with(classNode);
 		}
-
-		System.out.println(g.toString());
-		// Graphviz.fromGraph(g).render(Format.PNG).toFile(new File("example/ex1.png"));
-		assertThat(recipes).isEqualTo("");
+		Graphviz.fromGraph(g).render(Format.PNG).toFile(new File("example/ex1.png"));
 	}
 
-	private ArrayList<Recipe> extractRecipes(String file) throws IOException {
-		Path path = new File(file).toPath();
-		List<String> lines = Files.readAllLines(path);
-		ArrayList<Recipe> recipes = new ArrayList<Recipe>();
-		for (int i = 0; i < lines.size(); i++) {
-			if (lines.get(i).contains("ingredients")) {
-				ArrayList<Ingredient> ingredients = new ArrayList<>();
-				while (!lines.get(i).contains("result")) {
-					Matcher normalIngredientMatcher = ingredientPattern.matcher(lines.get(i));
-					while (normalIngredientMatcher.find()) {
-						Ingredient e = new Ingredient(normalIngredientMatcher.group(1),
-								normalIngredientMatcher.group(3));
-						ingredients.add(e);
-					}
-					Matcher m = ingredientFluidPattern.matcher(lines.get(i));
-					while (m.find()) {
-						Ingredient e = new Ingredient(m.group(1), m.group(3));
-						ingredients.add(e);
-					}
-					i++;
-				}
-				if (lines.get(i).contains("result")) {
-					Matcher m = resultPattern.matcher(lines.get(i));
-					if (m.find()) {
-						recipes.add(new Recipe(m.group(1), ingredients));
-					}
-				}
-			}
-		}
-		return recipes;
-	}
 }
