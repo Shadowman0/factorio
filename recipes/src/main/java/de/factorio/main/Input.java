@@ -1,54 +1,25 @@
 package de.factorio.main;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 
 public class Input {
 
-	private ArrayList<Recipe> recipes;
+	private HashMap<String, Recipe> recipes;
+	private String template = "templates/nodes.ftl";
 
-	public Input(ArrayList<Recipe> recipes) {
-		this.recipes = recipes;
-		HashMap<String, List<Recipe>> orderedMap = new HashMap<>();
-		for (Recipe recipe : recipes) {
-			orderedMap.putIfAbsent(recipe.getResult(), Arrays.asList(recipe));
-			orderedMap.computeIfPresent(recipe.getResult(), (key, oldList) -> {
-				oldList.add(recipe);
-				return oldList;
-			});
-		}
-		for (String recipe : orderedMap.keySet()) {
-			orderedMap.compute(recipe, (key, oldList) -> {
-				for (Recipe r : recipes) {
-					for (int i = 0; i < oldList.size(); i++) {
-						if (r.equals(oldList.get(i))) {
-
-						}
-
-					}
-				}
-				return oldList;
-			});
-		}
+	public Input(HashMap<String, Recipe> hashMap) {
+		this.recipes = hashMap;
 	}
 
-	@Override
-	public String toString() {
-		return "Input [recipes=" + recipes + "]";
-	}
-
-	public ArrayList<Recipe> getRecipes() {
+	public HashMap<String, Recipe> getRecipes() {
 		return recipes;
 	}
 
-	public void setRecipes(ArrayList<Recipe> recipes) {
+	public void setRecipes(HashMap<String, Recipe> recipes) {
 		this.recipes = recipes;
 	}
 
 	public String getTemplate() {
-		return "templates/nodes.ftl";
+		return template;
 	}
-
 }

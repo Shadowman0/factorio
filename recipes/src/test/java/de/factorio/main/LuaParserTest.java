@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -38,44 +39,22 @@ public class LuaParserTest {
 	public void extractRecipes_AndWriteJsonWithTemplate() throws Exception {
 		String file = FILE;
 		SourceFileWritingService sourceFileWritingService = new SourceFileWritingService();
-		sourceFileWritingService.createFilesSafely(new Input(RecipeExtractor.extractRecipesWithEnergy(file)));
+		sourceFileWritingService.createFilesSafely(new Input(RecipeMatcher.extractRecipesToHashMapFromFile(file)));
 	}
 
 	@Test
 	public void extractRecipes_AndWriteJsonWithJackson() throws Exception {
 		String file = FILE;
 		ObjectMapper objectMapper = new ObjectMapper();
-		GraphInput graphInput = new GraphInput(new Input(RecipeExtractor.extractRecipesWithEnergy(file)));
+		GraphInput graphInput = new GraphInput(new Input(RecipeMatcher.extractRecipesToHashMapFromFile(file)));
 		objectMapper.writeValue(new File("example//d3test//recipes.json"), graphInput);
-	}
-
-	@Test
-	public void extractRecipes_WithEnergy() throws Exception {
-		String file = FILE;
-		Input input = new Input(RecipeExtractor.extractRecipesWithoutEnergy(file));
-		assertThat(input).isEqualTo("");
-	}
-
-	@Test
-	public void extractRecipes_WithoutEnergy() throws Exception {
-		String file = FILE;
-		Input input = new Input(RecipeExtractor.extractRecipesWithEnergy(file));
-		assertThat(input).isEqualTo("");
-	}
-
-	@Test
-	public void extractAllRecipes() throws Exception {
-		String file = FILE;
-		Input withEnergy = new Input(RecipeExtractor.extractRecipesWithEnergy(file));
-		Input withoutEnergy = new Input(RecipeExtractor.extractRecipesWithoutEnergy(file));
-		assertThat(withEnergy).isEqualTo("");
 	}
 
 	@Test
 	@Ignore
 	public void extractRecipes_AndDrawGraph() throws Exception {
 		String file = FILE;
-		ArrayList<Recipe> recipes = RecipeExtractor.extractRecipesWithEnergy(file);
+		Collection<Recipe> recipes = RecipeMatcher.extractRecipesToHashMapFromFile(file).values();
 
 		GraphvizJdkEngine engine = new GraphvizJdkEngine();
 		Graphviz.useEngine(engine, engine);

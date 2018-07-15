@@ -2,11 +2,10 @@ package de.factorio.main;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.junit.Test;
 
@@ -35,6 +34,8 @@ public class RecipeMatcherTest {
 			+ "        name = \"uranium-235\",\r\n" + "        amount = 41\r\n" + "      },\r\n" + "      {\r\n"
 			+ "        name = \"uranium-238\",\r\n" + "        amount = 2\r\n" + "      }\r\n" + "    },\r\n"
 			+ "    allow_decomposition = false\r\n" + "  },";
+	private static final String FILE = "C:\\Spiele\\Factorio\\data\\base\\prototypes\\recipe\\recipe.lua";
+	private static final String FILE_DEMO_RECIPES = "demo-recipe.lua";
 
 	@Test
 	public void findResults() throws Exception {
@@ -67,7 +68,7 @@ public class RecipeMatcherTest {
 
 	@Test
 	public void findRecipes() throws Exception {
-		ArrayList<String> findResults = RecipeMatcher.findRecipes(TWO_RECIPES);
+		ArrayList<String> findResults = RecipeMatcher.findRecipesBlocks(TWO_RECIPES);
 		assertThat(findResults.toString()).isEqualTo("[{\r\n" + "    type = \"recipe\",\r\n"
 				+ "    name = \"player-port\",\r\n" + "    enabled = false,\r\n" + "    ingredients =\r\n" + "    {\r\n"
 				+ "      {\"electronic-circuit\", 10},\r\n" + "      {\"iron-gear-wheel\", 5},\r\n"
@@ -94,22 +95,22 @@ public class RecipeMatcherTest {
 	}
 
 	@Test
-	public void findRecipesAsHashMap_ConvertToRecipes() throws Exception {
-		ArrayList<Map<String, String>> findRecipesAsHashMap = RecipeMatcher.findRecipesAsHashMap(TWO_RECIPES);
-		HashMap<String, Recipe> hashMap = new HashMap<String, Recipe>();
-		for (Map<String, String> recipeMap : findRecipesAsHashMap) {
-			String ingredientsAsString = recipeMap.get("ingredients");
-			ArrayList<HashMap<String, String>> splitIngredients = RecipeMatcher
-					.splitIngredientsToMap(ingredientsAsString);
-			List<Ingredient> ingredientsList = splitIngredients.stream()
-					.map(ingredientAsMap -> new Ingredient(ingredientAsMap.get("name"), ingredientAsMap.get("amount")))
-					.collect(Collectors.toList());
-			Recipe recipe = new Recipe(recipeMap.get("result"), Double.parseDouble(recipeMap.get("energy_required")),
-					ingredientsList);
-			hashMap.put(recipeMap.get("name"), recipe);
-		}
+	public void extractRecipesToHashMap_ConvertToRecipes() throws Exception {
+		HashMap<String, Recipe> hashMap = RecipeMatcher.extractRecipesToHashMap(TWO_RECIPES);
 		assertThat(hashMap).isEqualTo("");
 
+	}
+
+	@Test
+	public void extractRecipesToHashMapFromFile() throws Exception {
+		HashMap<String, Recipe> hashMap = RecipeMatcher.extractRecipesToHashMapFromFile(FILE);
+		assertThat(hashMap).isEqualTo("");
+	}
+
+	@Test
+	public void extractRecipesToHashMapFromFile_DemoRecipes() throws Exception {
+		HashMap<String, Recipe> hashMap = RecipeMatcher.extractRecipesToHashMapFromFile(getClass().getResource(FILE_DEMO_RECIPES).toURI().getPath());
+		assertThat(hashMap).isEqualTo("");
 	}
 
 	@Test

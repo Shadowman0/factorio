@@ -1,10 +1,16 @@
 package de.factorio.main;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class RecipeMatcher {
 
@@ -68,7 +74,7 @@ public class RecipeMatcher {
 		return ingredients;
 	}
 
-	public static ArrayList<String> findRecipes(String string) {
+	public static ArrayList<String> findRecipesBlocks(String string) {
 		ArrayList<String> recipes = new ArrayList<>();
 		for (int i = string.indexOf("{") + 1; i < string.length(); i++) {
 			if (string.charAt(i) == '{') {
@@ -82,10 +88,11 @@ public class RecipeMatcher {
 
 	public static ArrayList<Map<String, String>> findRecipesAsHashMap(String string) {
 		ArrayList<Map<String, String>> result = new ArrayList<Map<String, String>>();
-		ArrayList<String> findRecipes = findRecipes(string);
+		ArrayList<String> findRecipes = findRecipesBlocks(string);
 		for (String recipe : findRecipes) {
 			HashMap<String, String> hashMap = new HashMap<>();
 			hashMap.put("energy_required", "0.5");
+			hashMap.put("result_count", "1");
 			hashMap.put("name", findName(recipe));
 			hashMap.put("results", findResults(recipe));
 			hashMap.put("ingredients", findIngredients(recipe));
@@ -93,6 +100,10 @@ public class RecipeMatcher {
 			String findEnergyRequired = findEnergyRequired(recipe);
 			if (findEnergyRequired != "") {
 				hashMap.put("energy_required", findEnergyRequired);
+			}
+			String findResultCount = findField(recipe, RESULT_COUNT_MATCHER);
+			if (findResultCount != "") {
+				hashMap.put("result_count", findResultCount);
 			}
 			result.add(hashMap);
 		}
@@ -117,6 +128,28 @@ public class RecipeMatcher {
 			result.add(hashMap);
 		}
 		return result;
+	}
+
+	public static HashMap<String, Recipe> extractRecipesToHashMapFromFile(String file) throws IOException {
+		Path path = new File(file).toPath();
+		return extractRecipesToHashMap(new String(Files.readAllBytes(path)));
+	}
+
+	public static HashMap<String, Recipe> extractRecipesToHashMap(String recipesString) {
+		ArrayList<Map<String, String>> findRecipesAsHashMap = RecipeMatcher.findRecipesAsHashMap(recipesString);
+		HashMap<String, Recipe> hashMap = new HashMap<String, Recipe>();
+		for (Map<String, String> recipeMap : findRecipesAsHashMap) {
+			String ingredientsAsString = recipeMap.get("ingredients");
+			ArrayList<HashMap<String, String>> splitIngredients = RecipeMatcher
+					.splitIngredientsToMap(ingredientsAsString);
+			List<Ingredient> ingredientsList = splitIngredients.stream()
+					.map(ingredientAsMap -> new Ingredient(ingredientAsMap.get("name"), ingredientAsMap.get("amount")))
+					.collect(Collectors.toList());
+			Recipe recipe = new Recipe(recipeMap.get("result"), Double.parseDouble(recipeMap.get("result_count")),
+					Double.parseDouble(recipeMap.get("energy_required")), ingredientsList);
+			hashMap.put(recipeMap.get("name"), recipe);
+		}
+		return hashMap;
 	}
 
 	private static int findNextBlockBeginIndex(String recipe, int startIndex) {
