@@ -2,6 +2,7 @@ package de.factorio.main;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -130,12 +131,17 @@ public class RecipeMatcher {
 		return result;
 	}
 
-	public static HashMap<String, Recipe> extractRecipesToHashMapFromFile(String file) throws IOException {
-		Path path = new File(file).toPath();
-		return extractRecipesToHashMap(new String(Files.readAllBytes(path)));
+	public static HashMap<String, Recipe> extractRecipesToHashMapFromFile(URL file) throws IOException {
+		Path path = new File(file.getPath()).toPath();
+		return extractRecipesToRecipeNameHashMap(new String(Files.readAllBytes(path)));
 	}
 
-	public static HashMap<String, Recipe> extractRecipesToHashMap(String recipesString) {
+	public static HashMap<String, Recipe> extractRecipesToHashMapFromFile(String file) throws IOException {
+		Path path = new File(file).toPath();
+		return extractRecipesToRecipeNameHashMap(new String(Files.readAllBytes(path)));
+	}
+
+	public static HashMap<String, Recipe> extractRecipesToRecipeNameHashMap(String recipesString) {
 		ArrayList<Map<String, String>> findRecipesAsHashMap = RecipeMatcher.findRecipesAsHashMap(recipesString);
 		HashMap<String, Recipe> hashMap = new HashMap<String, Recipe>();
 		for (Map<String, String> recipeMap : findRecipesAsHashMap) {

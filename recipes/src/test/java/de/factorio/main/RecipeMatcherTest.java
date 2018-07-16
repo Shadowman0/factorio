@@ -96,20 +96,21 @@ public class RecipeMatcherTest {
 
 	@Test
 	public void extractRecipesToHashMap_ConvertToRecipes() throws Exception {
-		HashMap<String, Recipe> hashMap = RecipeMatcher.extractRecipesToHashMap(TWO_RECIPES);
+		HashMap<String, Recipe> hashMap = RecipeMatcher.extractRecipesToRecipeNameHashMap(TWO_RECIPES);
 		assertThat(hashMap).isEqualTo("");
 
 	}
 
 	@Test
 	public void extractRecipesToHashMapFromFile() throws Exception {
-		HashMap<String, Recipe> hashMap = RecipeMatcher.extractRecipesToHashMapFromFile(FILE);
+		HashMap<String, Recipe> hashMap = RecipeMatcher.extractRecipesToHashMapFromFile(new URL(FILE));
 		assertThat(hashMap).isEqualTo("");
 	}
 
 	@Test
 	public void extractRecipesToHashMapFromFile_DemoRecipes() throws Exception {
-		HashMap<String, Recipe> hashMap = RecipeMatcher.extractRecipesToHashMapFromFile(getClass().getResource(FILE_DEMO_RECIPES).toURI().getPath());
+		HashMap<String, Recipe> hashMap = RecipeMatcher
+				.extractRecipesToHashMapFromFile(getClass().getResource(FILE_DEMO_RECIPES));
 		assertThat(hashMap).isEqualTo("");
 	}
 
