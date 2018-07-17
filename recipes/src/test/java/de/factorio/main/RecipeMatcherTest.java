@@ -54,14 +54,14 @@ public class RecipeMatcherTest {
 	@Test
 	public void splitIngredients() throws Exception {
 		ArrayList<String> findResults = RecipeMatcher
-				.splitIngredients("ingredients = {{\"uranium-235\", 40}, {\"uranium-238\", 5}");
+				.splitList("ingredients = {{\"uranium-235\", 40}, {\"uranium-238\", 5}");
 		assertThat(findResults.toString()).isEqualTo("[{\"uranium-235\", 40}, {\"uranium-238\", 5}]");
 	}
 
 	@Test
 	public void splitIngredients_AfterFind() throws Exception {
 		String ingredients = RecipeMatcher.findIngredients(REFINED_CONCRETE);
-		ArrayList<String> findResults = RecipeMatcher.splitIngredients(ingredients);
+		ArrayList<String> findResults = RecipeMatcher.splitList(ingredients);
 		assertThat(findResults.toString()).isEqualTo(
 				"[{\"concrete\", 20}, {\"iron-stick\", 8}, {\"steel-plate\", 1}, {type=\"fluid\", name=\"water\", amount=100}]");
 	}
@@ -112,6 +112,10 @@ public class RecipeMatcherTest {
 		HashMap<String, Recipe> hashMap = RecipeMatcher
 				.extractRecipesToHashMapFromFile(getClass().getResource(FILE_DEMO_RECIPES));
 		assertThat(hashMap).isEqualTo("");
+	}
+
+	@Test
+	public void testName() throws Exception {
 	}
 
 	@Test

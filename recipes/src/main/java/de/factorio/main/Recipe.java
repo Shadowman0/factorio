@@ -4,39 +4,28 @@ import java.util.List;
 
 public class Recipe {
 
-	private String result;
-
-	private List<Ingredient> ingredients;
+	private List<Product> results;
 	private double energy;
-	private double resultCount;
+	private List<Product> ingredients;
 
-	public Recipe(String result, double resultCount, double energy, List<Ingredient> ingredients) {
-		this.setResultCount(resultCount);
-		this.setEnergy(energy);
-		this.setResult(result);
-		this.setIngredients(ingredients);
+	public Recipe(List<Product> results, double energy, List<Product> ingredients) {
+		this.results = results;
+		this.energy = energy;
+		this.ingredients = ingredients;
+
 	}
 
 	@Override
 	public String toString() {
-		return "Recipe [result=" + result + ", ingredients=" + ingredients + ", energy=" + energy + ", resultCount="
-				+ resultCount + "]";
+		return String.format("Recipe [results=%s, energy=%s, ingredients=%s]", results, energy, ingredients);
 	}
 
-	public List<Ingredient> getIngredients() {
-		return ingredients;
+	public List<Product> getResults() {
+		return results;
 	}
 
-	public void setIngredients(List<Ingredient> ingredients) {
-		this.ingredients = ingredients;
-	}
-
-	public String getResult() {
-		return result;
-	}
-
-	public void setResult(String result) {
-		this.result = result;
+	public void setResults(List<Product> results) {
+		this.results = results;
 	}
 
 	public double getEnergy() {
@@ -47,12 +36,12 @@ public class Recipe {
 		this.energy = energy;
 	}
 
-	public double getResultCount() {
-		return resultCount;
+	public List<Product> getIngredients() {
+		return ingredients;
 	}
 
-	public void setResultCount(double resultCount) {
-		this.resultCount = resultCount;
+	public void setIngredients(List<Product> ingredients) {
+		this.ingredients = ingredients;
 	}
 
 }

@@ -1,11 +1,11 @@
 package de.factorio.main;
 
-public class Ingredient {
+public class Product {
 
 	private String type;
 	private String count;
 
-	public Ingredient(String type, String count) {
+	public Product(String type, String count) {
 		this.type = type;
 		this.count = count;
 	}
@@ -39,7 +39,7 @@ public class Ingredient {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Ingredient other = (Ingredient) obj;
+		Product other = (Product) obj;
 		if (count == null) {
 			if (other.count != null)
 				return false;
@@ -59,7 +59,7 @@ public class Ingredient {
 
 	@Override
 	public String toString() {
-		return "Ingredient [type=" + type + ", count=" + count + "]";
+		return "Product [type=" + type + ", count=" + count + "]";
 	}
 
 }

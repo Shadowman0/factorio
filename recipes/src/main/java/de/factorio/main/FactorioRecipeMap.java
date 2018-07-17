@@ -46,7 +46,10 @@ public class FactorioRecipeMap {
 			}
 		}
 		for (Recipe recipe : recipeNameMap.values()) {
-			resultHashMap.computeIfAbsent(recipe.getResult(), k -> new HashSet<Recipe>()).add(recipe);
+			List<Product> results = recipe.getResults();
+			for (Product product : results) {
+				resultHashMap.computeIfAbsent(product.getType(), k -> new HashSet<Recipe>()).add(recipe);
+			}
 		}
 
 	}
@@ -57,15 +60,15 @@ public class FactorioRecipeMap {
 
 	public RecipeTree getRecipePathFor(String result) {
 		Set<Recipe> recipes = getRecipesWithResult(result);
-		ArrayList<RecipeTree> ingredientPaths = new ArrayList<RecipeTree>();
+		HashMap<String, List<RecipeTree>> ingredientPaths = new HashMap();
 		for (Recipe recipe : recipes) {
 			ToStringCreator toStringCreator = new ToStringCreator(recipe);
 			System.out.println(toStringCreator.toString());
 			List<String> ingredients = recipe.getIngredients().stream()//
-					.map(Ingredient::getType).collect(Collectors.toList());
+					.map(Product::getType).collect(Collectors.toList());
 			for (String ingredient : ingredients) {
 				RecipeTree recipePathForIngredient = getRecipePathFor(ingredient);
-				ingredientPaths.add(recipePathForIngredient);
+				ingredientPaths.computeIfAbsent(ingredient, k -> new ArrayList<>()).add(recipePathForIngredient);
 			}
 
 		}

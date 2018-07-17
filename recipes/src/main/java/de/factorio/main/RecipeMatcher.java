@@ -63,7 +63,7 @@ public class RecipeMatcher {
 		return recipe.substring(findNextBlockBeginIndex(recipe, startIndex), blockEnd + 1).trim();
 	}
 
-	public static ArrayList<String> splitIngredients(String string) {
+	public static ArrayList<String> splitList(String string) {
 		ArrayList<String> ingredients = new ArrayList<>();
 		for (int i = string.indexOf("{") + 1; i < string.length(); i++) {
 			if (string.charAt(i) == '{') {
@@ -95,13 +95,14 @@ public class RecipeMatcher {
 			hashMap.put("energy_required", "0.5");
 			hashMap.put("result_count", "1");
 			hashMap.put("name", findName(recipe));
-			hashMap.put("results", findResults(recipe));
+			String findResults = findResults(recipe);
+			if (findResults != "") {
+				hashMap.put("results", findResults);
+			}
 			hashMap.put("ingredients", findIngredients(recipe));
 			hashMap.putIfAbsent("result", findResult(recipe));
 			String findEnergyRequired = findEnergyRequired(recipe);
-			if (findEnergyRequired != "") {
-				hashMap.put("energy_required", findEnergyRequired);
-			}
+			hashMap.put("energy_required", findEnergyRequired);
 			String findResultCount = findField(recipe, RESULT_COUNT_MATCHER);
 			if (findResultCount != "") {
 				hashMap.put("result_count", findResultCount);
@@ -112,7 +113,7 @@ public class RecipeMatcher {
 	}
 
 	public static ArrayList<HashMap<String, String>> splitIngredientsToMap(String ingredientsAsString) {
-		ArrayList<String> splitIngredients = splitIngredients(ingredientsAsString);
+		ArrayList<String> splitIngredients = splitList(ingredientsAsString);
 		ArrayList<HashMap<String, String>> result = new ArrayList<HashMap<String, String>>();
 		for (String ingredientAsString : splitIngredients) {
 			HashMap<String, String> hashMap = new HashMap<String, String>();
@@ -125,6 +126,26 @@ public class RecipeMatcher {
 				hashMap.put("name", ingredientAsString.substring(ingredientAsString.indexOf('"') + 1,
 						ingredientAsString.lastIndexOf('"')));
 				hashMap.put("amount", findField(ingredientAsString, INGREDIENT_AMOUNT_MATCHER));
+			}
+			result.add(hashMap);
+		}
+		return result;
+	}
+
+	public static ArrayList<HashMap<String, String>> splitResultsToMap(String resultsAsString) {
+		ArrayList<String> splitResults = splitList(resultsAsString);
+		ArrayList<HashMap<String, String>> result = new ArrayList<HashMap<String, String>>();
+		for (String resultAsString : splitResults) {
+			HashMap<String, String> hashMap = new HashMap<String, String>();
+			if (resultAsString.contains("=")) {
+				hashMap.put("type", findField(resultAsString, TYPE_MATCHER));
+				hashMap.put("name", findField(resultAsString, NAME_MATCHER));
+				hashMap.put("amount", findField(resultAsString, AMOUNT_MATCHER));
+			} else {
+				hashMap.put("type", "solid");
+				hashMap.put("name",
+						resultAsString.substring(resultAsString.indexOf('"') + 1, resultAsString.lastIndexOf('"')));
+				hashMap.put("amount", findField(resultAsString, INGREDIENT_AMOUNT_MATCHER));
 			}
 			result.add(hashMap);
 		}
@@ -145,17 +166,27 @@ public class RecipeMatcher {
 		ArrayList<Map<String, String>> findRecipesAsHashMap = RecipeMatcher.findRecipesAsHashMap(recipesString);
 		HashMap<String, Recipe> hashMap = new HashMap<String, Recipe>();
 		for (Map<String, String> recipeMap : findRecipesAsHashMap) {
-			String ingredientsAsString = recipeMap.get("ingredients");
-			ArrayList<HashMap<String, String>> splitIngredients = RecipeMatcher
-					.splitIngredientsToMap(ingredientsAsString);
-			List<Ingredient> ingredientsList = splitIngredients.stream()
-					.map(ingredientAsMap -> new Ingredient(ingredientAsMap.get("name"), ingredientAsMap.get("amount")))
-					.collect(Collectors.toList());
-			Recipe recipe = new Recipe(recipeMap.get("result"), Double.parseDouble(recipeMap.get("result_count")),
-					Double.parseDouble(recipeMap.get("energy_required")), ingredientsList);
+			List<Product> ingredientsList = extractIngredients(recipeMap.get("ingredients"));
+			List<Product> resultsList = new ArrayList<>();
+			if (recipeMap.containsKey("results")) {
+				resultsList = extractIngredients(recipeMap.get("results"));
+			}
+			if (recipeMap.containsKey("result")) {
+				resultsList.add(new Product(recipeMap.get("result"), recipeMap.get("result_count")));
+			}
+			Recipe recipe = new Recipe(resultsList, Double.parseDouble(recipeMap.get("energy_required")),
+					ingredientsList);
 			hashMap.put(recipeMap.get("name"), recipe);
 		}
 		return hashMap;
+	}
+
+	private static List<Product> extractIngredients(String ingredientsAsString) {
+		ArrayList<HashMap<String, String>> splitIngredients = RecipeMatcher.splitIngredientsToMap(ingredientsAsString);
+		List<Product> ingredientsList = splitIngredients.stream()
+				.map(ingredientAsMap -> new Product(ingredientAsMap.get("name"), ingredientAsMap.get("amount")))
+				.collect(Collectors.toList());
+		return ingredientsList;
 	}
 
 	private static int findNextBlockBeginIndex(String recipe, int startIndex) {

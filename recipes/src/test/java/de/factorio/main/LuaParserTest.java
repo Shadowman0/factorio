@@ -51,7 +51,7 @@ public class LuaParserTest {
 	}
 
 	@Test
-	@Ignore
+	// @Ignore
 	public void extractRecipes_AndDrawGraph() throws Exception {
 		String file = FILE;
 		Collection<Recipe> recipes = RecipeMatcher.extractRecipesToHashMapFromFile(file).values();
@@ -60,11 +60,12 @@ public class LuaParserTest {
 		Graphviz.useEngine(engine, engine);
 		Graph g = graph("example1").cluster();
 		for (Recipe recipe : recipes) {
-			Node classNode = node(recipe.getResult());
+
+			Node classNode = node(recipe.getResults().toString());
 			System.out.println();
-			List<Ingredient> ingredients = recipe.getIngredients();
-			for (Ingredient ingredient : ingredients) {
-				classNode = classNode.link(ingredient.getType());
+			List<Product> products = recipe.getIngredients();
+			for (Product product : products) {
+				classNode = classNode.link(product.getType());
 
 			}
 			g = g.with(classNode);
@@ -108,17 +109,17 @@ public class LuaParserTest {
 		// }
 		// i++;
 		// if (lines.get(i).contains("ingredients")) {
-		// ArrayList<Ingredient> ingredients = new ArrayList<>();
+		// ArrayList<Product> ingredients = new ArrayList<>();
 		// while (!lines.get(i).contains("result")) {
 		// Matcher normalIngredientMatcher = INGREDIENTPATTERN.matcher(lines.get(i));
 		// while (normalIngredientMatcher.find()) {
-		// Ingredient e = new Ingredient(normalIngredientMatcher.group(1),
+		// Product e = new Product(normalIngredientMatcher.group(1),
 		// normalIngredientMatcher.group(3));
 		// ingredients.add(e);
 		// }
 		// Matcher m = INGREDIENTFLUIDPATTERN.matcher(lines.get(i));
 		// while (m.find()) {
-		// Ingredient e = new Ingredient(m.group(1), m.group(3));
+		// Product e = new Product(m.group(1), m.group(3));
 		// ingredients.add(e);
 		// }
 		// i++;

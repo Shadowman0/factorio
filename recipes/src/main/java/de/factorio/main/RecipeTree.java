@@ -1,23 +1,16 @@
 package de.factorio.main;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class RecipeTree {
 
 	private String result;
 	// hashMap mit ingredientName als key
-	private ArrayList<RecipeTree> ingredientPaths;
+	private HashMap<String, List<RecipeTree>> ingredientPaths;
 
-	public RecipeTree(String result, ArrayList<RecipeTree> ingredientPaths) {
+	public RecipeTree(String result, HashMap<String, List<RecipeTree>> ingredientPaths) {
 		this.setResult(result);
-		this.setIngredientPaths(ingredientPaths);
-	}
-
-	public ArrayList<RecipeTree> getIngredientPaths() {
-		return ingredientPaths;
-	}
-
-	public void setIngredientPaths(ArrayList<RecipeTree> ingredientPaths) {
 		this.ingredientPaths = ingredientPaths;
 	}
 
@@ -27,8 +20,8 @@ public class RecipeTree {
 
 	@Override
 	public String toString() {
-		return result + "<-(\n "
-				+ ingredientPaths.stream().map(RecipeTree::toString).reduce((r1, r2) -> r1.concat("\n\t" + r2)) + ")";
+		return result + "<-(\n " + ingredientPaths.values().stream().map(list -> list.get(0).toString())
+				.reduce((r1, r2) -> r1.concat("\n\t" + r2)) + ")";
 	}
 
 	public void setResult(String result) {
