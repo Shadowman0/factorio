@@ -13,6 +13,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.springframework.core.style.ToStringCreator;
+
 public class FactorioRecipeMap {
 	private HashMap<String, Recipe> recipeNameMap = new HashMap<>();
 	private HashMap<String, Set<Recipe>> resultHashMap = new HashMap<>();;
@@ -57,17 +59,22 @@ public class FactorioRecipeMap {
 		Set<Recipe> recipes = getRecipesWithResult(result);
 		ArrayList<RecipeTree> ingredientPaths = new ArrayList<RecipeTree>();
 		for (Recipe recipe : recipes) {
+			ToStringCreator toStringCreator = new ToStringCreator(recipe);
+			System.out.println(toStringCreator.toString());
 			List<String> ingredients = recipe.getIngredients().stream()//
 					.map(Ingredient::getType).collect(Collectors.toList());
 			for (String ingredient : ingredients) {
 				RecipeTree recipePathForIngredient = getRecipePathFor(ingredient);
 				ingredientPaths.add(recipePathForIngredient);
-
 			}
 
 		}
 
 		return new RecipeTree(result, ingredientPaths);
+	}
+
+	public Set<String> allRecipes() {
+		return recipeNameMap.keySet();
 	}
 
 }

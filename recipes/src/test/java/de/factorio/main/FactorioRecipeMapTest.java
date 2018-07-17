@@ -47,9 +47,15 @@ public class FactorioRecipeMapTest {
 	@Test
 	public void testName() throws Exception {
 		FactorioRecipeMap factorioRecipeMap = createMapWithAllRecipes();
-		RecipeTree recipeTree = factorioRecipeMap.getRecipePathFor("transport-belt");
-		assertThat(recipeTree).isEqualTo("");
+		RecipeTree recipeTree = factorioRecipeMap.getRecipePathFor("rocket");
+		assertThat(recipeTree.toString()).isEqualTo("");
+	}
 
+	@Test
+	public void printRecipes() throws Exception {
+		FactorioRecipeMap factorioRecipeMap = createMapWithAllRecipes();
+		Set<String> allRecipes = factorioRecipeMap.allRecipes();
+		assertThat(allRecipes).isEqualTo("");
 	}
 
 	public List<Path> getAllFilesInDirectory(String directory) throws IOException {

@@ -122,7 +122,7 @@ public class RecipeMatcher {
 				hashMap.put("amount", findField(ingredientAsString, AMOUNT_MATCHER));
 			} else {
 				hashMap.put("type", "solid");
-				hashMap.put("name", ingredientAsString.substring(ingredientAsString.indexOf('"'),
+				hashMap.put("name", ingredientAsString.substring(ingredientAsString.indexOf('"') + 1,
 						ingredientAsString.lastIndexOf('"')));
 				hashMap.put("amount", findField(ingredientAsString, INGREDIENT_AMOUNT_MATCHER));
 			}
